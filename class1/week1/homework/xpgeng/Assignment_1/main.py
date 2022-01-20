@@ -22,10 +22,7 @@ def judge_lang(words):
     '''
     word_list = filter(None, re.split(r',|\s+', words))
     for word in word_list:
-        if not word.isalpha():
-            return "Chinese"
-        else:
-            return "English"
+        return "Chinese" if not word.isalpha() else "English"
 
 def extract_information(signature, language, st):
     '''
@@ -41,26 +38,26 @@ def extract_information(signature, language, st):
     tel_list = []
     email_list = []
     name_list = []
-    
+
     p_email = re.compile(r'\w+@(\w+\.)+(\w+)')
     p_tel = re.compile(r'''(\+([\d|\s]+)) # +86 132 2345 2345
                    | (电话.+([\d|\s|\-]+))
                    | (Tel.+([\d|\s|\-]+))
                    | (手机.+([\d|\s|\-]+))
                    | Mobile.+([\d|\s|\-]+)''', re.VERBOSE)
-    
+
     for item in words_list:
-        
+
         # Extract tel list
         if p_tel.search(item): 
             tel_group = p_tel.search(item).group()
             tel_list.append(tel_group) 
-        
+
         # Extract email list
         elif p_email.search(item):
             m = p_email.search(item).group()
             email_list.append(m) 
-            
+
         # Extract name and orgnization from Chinese signature
         elif language == "Chinese":
             words = pseg.cut(item)
@@ -69,7 +66,7 @@ def extract_information(signature, language, st):
                 orgnization_list.append(item)
             elif 'nr'in flag_list:
                 name_list.append(item)
-        
+
         # Extract name and orgnization from English signature
         elif language == "English":
             flag_list = [flag for word, flag in st.tag(item.split())]
@@ -79,10 +76,9 @@ def extract_information(signature, language, st):
                 name_list.append(item)
         else:
             return "Nothing to extract!"
-    
-    information_dict = {"name": list(set(name_list)), "tel": tel_list, 
-                        "email": email_list, "orgnization": orgnization_list}
-    return information_dict         
+
+    return {"name": list(set(name_list)), "tel": tel_list, 
+                        "email": email_list, "orgnization": orgnization_list}         
 
 def main(data):
     p = re.compile(r'-{2,}')
